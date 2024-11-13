@@ -5,6 +5,7 @@ import edu.badpals.Model.Empleado;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -53,49 +54,49 @@ public class Ejercicio2 {
     //Ejercicio 2.2
 
     public static List<Empleado> viewEmpleadosLocalidades(Connection conector, String localidad) {
-        try {
-            List<Empleado> empleados = new ArrayList<>();
-            String query = "SELECT E.Nome AS Nome_empregado, E.Apelido_1, E.Apelido_2, E.Localidade, E.Salario, E.Data_nacemento, J.Nome AS Nome_xefe, D.Nome_departamento FROM EMPREGADO E LEFT JOIN EMPREGADO J ON E.NSS_Supervisa = J.NSS JOIN DEPARTAMENTO D ON E.Num_departamento_pertenece = D.Num_departamento WHERE E.Localidade = ?";
-            try ( PreparedStatement preparedStatement = conector.prepareStatement(query);
-                  preparedStatement.setString(1, localidad);
-                  preparedStatement.executeQuery())
-            {
-                while (preparedStatement.getResultSet().next()) {
+        List<Empleado> empleados = new ArrayList<>();
+        String query = "SELECT E.Nome AS Nome_empregado, E.Apelido_1, E.Apelido_2, E.Localidade, E.Salario, E.Data_nacemento, J.Nome AS Nome_xefe, D.Nome_departamento FROM EMPREGADO E LEFT JOIN EMPREGADO J ON E.NSS_Supervisa = J.NSS JOIN DEPARTAMENTO D ON E.Num_departamento_pertenece = D.Num_departamento WHERE E.Localidade = ?";
+
+        try (PreparedStatement preparedStatement = conector.prepareStatement(query)) {
+            preparedStatement.setString(1, localidad);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()) {
                     empleados.add(new Empleado(
-                            preparedStatement.getResultSet().getString("Nome_empregado"),
-                            preparedStatement.getResultSet().getString("Apelido_1"),
-                            preparedStatement.getResultSet().getString("Apelido_2"),
-                            preparedStatement.getResultSet().getString("Localidade"),
-                            preparedStatement.getResultSet().getFloat("Salario"),
-                            preparedStatement.getResultSet().getString("Data_nacemento"),
-                            preparedStatement.getResultSet().getString("Nome_xefe"),
-                            preparedStatement.getResultSet().getString("Nome_departamento")
+                            resultSet.getString("Nome_empregado"),
+                            resultSet.getString("Apelido_1"),
+                            resultSet.getString("Apelido_2"),
+                            resultSet.getString("Localidade"),
+                            resultSet.getFloat("Salario"),
+                            resultSet.getString("Data_nacemento"),
+                            resultSet.getString("Nome_xefe"),
+                            resultSet.getString("Nome_departamento")
                     ));
                 }
             }
-
-            return empleados;
         } catch (SQLException e) {
             System.err.println("Error al ver los empleados de la localidad: " + e.getMessage());
         }
-        return null;
+
+        return empleados;
     }
 
-    public void listarEmpleadosLocalidades(Connection conector) throws SQLException{
-        List<Empleado> empleados = viewEmpleadosLocalidades(conector, "Vigo");
+    public static void listarEmpleadosLocalidades(Connection conector, String localidad) throws SQLException{
+        List<Empleado> empleados = viewEmpleadosLocalidades(conector, localidad);
         StringBuilder sb = new StringBuilder();
 
         for (Empleado empleado : empleados){
-            sb.append("- Nombre: ").append(empleado.getNomeEmpregado()).append(" ")
-                    .append("/ Apellido 1: ").append(empleado.getApelido1()).append(" ")
-                    .append("/ Apellido 2: ").append(empleado.getApelido2()).append(" ")
-                    .append("/ Localidad: ").append(empleado.getLocalidade()).append(" ")
-                    .append("/ Salario: ").append(empleado.getSalario()).append(" ")
-                    .append("/ Fecha de nacimiento: ").append(empleado.getDataNacemento()).append(" ")
-                    .append("/ Nombre del jefe: ").append(empleado.getNomeXefe()).append(" ")
-                    .append("/ Nombre del departamento: ").append(empleado.getNomeDepartamento()).append(" ")
+            StringBuilder append = sb.append("- Nombre: ").append(empleado.getNomeEmpregado()).append(" ")
+                    .append(", 1er Apellido: ").append(empleado.getApelido1()).append(" ")
+                    .append(", 2o Apellido: ").append(empleado.getApelido2()).append(" ")
+                    .append(", Localidad: ").append(empleado.getLocalidade()).append(" ")
+                    .append(", Salario: ").append(empleado.getSalario()).append("€ ")
+                    .append(", Fecha de nacimiento: ").append(empleado.getDataNacemento()).append(" ")
+                    .append(", Jefe: ").append(empleado.getNomeXefe()).append(" ")
+                    .append(", Departamento: ").append(empleado.getNomeDepartamento()).append(" ")
                     .append("\n");
         }
+
+        System.out.println(sb.toString());
 
     }
 

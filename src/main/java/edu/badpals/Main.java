@@ -26,7 +26,7 @@ public class Main {
 
         //Ejercicio 2.2
         //Funciona con datos hardcodeados
-        Ejercicio2.viewEmpleadosLocalidades(conector, "Vigo");
+        Ejercicio2.listarEmpleadosLocalidades(conector, "Vigo");
 
     }
 }
