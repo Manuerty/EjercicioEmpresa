@@ -2,6 +2,7 @@ package edu.badpals;
 
 import edu.badpals.Model.Departamento;
 import edu.badpals.Model.Empleado;
+import edu.badpals.Model.Proxecto;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -100,6 +101,51 @@ public class Ejercicio2 {
 
     }
 
+    //Ejercicio 2.3
+    // -A
+
+    public static void changeDepartamentoInProxecto(Connection conector, String Nome_Proxecto, String Nome_departamento) {
+        try {
+            String query = "UPDATE PROXECTO SET Num_departamento_controla = (SELECT Num_departamento FROM DEPARTAMENTO WHERE Nome_departamento = ?) WHERE  Nome_proxecto = ?";
+            PreparedStatement preparedStatement = conector.prepareStatement(query);
+            preparedStatement.setString(1, Nome_departamento);
+            preparedStatement.setString(2, Nome_Proxecto);
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            System.err.println("Error al cambiar el departamento en el proyecto: " + e.getMessage());
+        }
+
+    }
+
+
+    //-B
+    public static void newProxecto(Connection conector, Proxecto newProxecto){
+        try {
+            String query = "INSERT INTO PROXECTO (Num_proxecto, Nome_proxecto, Lugar, Num_departamento_controla) VALUES (?, ?, ?, ?)";
+            PreparedStatement preparedStatement = conector.prepareStatement(query);
+            preparedStatement.setInt(1, newProxecto.getNum_proxecto());
+            preparedStatement.setString(2, newProxecto.getNome_proxecto());
+            preparedStatement.setString(3, newProxecto.getLugar());
+            preparedStatement.setInt(4, newProxecto.getNum_departamento_controla());
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            System.err.println("Error al crear el proyecto: " + e.getMessage());
+        }
+
+    }
+
+    //-C
+    public static void deleteProxecto(Connection conector, int Num_Proxecto){
+        try{
+            String query = "DELETE FROM PROXECTO WHERE Num_proxecto = ?";
+            PreparedStatement preparedStatement = conector.prepareStatement(query);
+            preparedStatement.setInt(1, Num_Proxecto);
+            preparedStatement.executeUpdate();
+        }catch(SQLException e){
+            System.out.println("Error al eliminar un proxecto" + e.getMessage());
+        }
+
+    }
 
 
 }

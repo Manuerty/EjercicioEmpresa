@@ -3,6 +3,7 @@ package edu.badpals;
 
 import edu.badpals.Model.Departamento;
 import edu.badpals.Model.ConnectionDDBB;
+import edu.badpals.Model.Proxecto;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -26,7 +27,18 @@ public class Main {
 
         //Ejercicio 2.2
         //Funciona con datos hardcodeados
-        Ejercicio2.listarEmpleadosLocalidades(conector, "Vigo");
+        //Ejercicio2.listarEmpleadosLocalidades(conector, "Vigo");
+
+        //Ejercicio 2.3
+        //-A
+        //Funciona con datos hardcodeados
+        //Ejercicio2.changeDepartamentoInProxecto(conector, "DESEÑO NOVA TENDA VIGO", "TÉCNICO");
+        //-B
+        //Funciona con datos hardcodeados
+        //Ejercicio2.newProxecto(conector, new Proxecto(11, "Proyecto 9", "Vigo", 7));
+        //-C
+        //Funciona con datos hardcodeados
+        //Ejercicio2.deleteProxecto(conector, 11);
 
     }
 }
