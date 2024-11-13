@@ -39,6 +39,9 @@ public class Main {
         //-C
         //Funciona con datos hardcodeados
         //Ejercicio2.deleteProxecto(conector, 11);
+        //Ejercicio 2.4
+        //Funciona con datos hardcodeados
+        Ejercicio2.listProxetosOfDepartamentos(conector, "Vigo");
 
     }
 }

@@ -148,4 +148,46 @@ public class Ejercicio2 {
     }
 
 
+    //Ejercicio 2.4
+    public static List<Proxecto> proxectosOfDepartamento(Connection conector, String Nome_departamento) {
+        List<Proxecto> proxectos = new ArrayList<>();
+        String query = "SELECT P.Num_proxecto, P.Nome_proxecto, P.Lugar FROM PROXECTO P JOIN DEPARTAMENTO D ON P.Num_departamento_controla = D.Num_departamento WHERE D.Nome_departamento = ?";
+        try {
+            PreparedStatement preparedStatement = conector.prepareStatement(query);
+            preparedStatement.setString(1, Nome_departamento);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                proxectos.add(new Proxecto(
+                        resultSet.getInt("Num_proxecto"),
+                        resultSet.getString("Nome_proxecto"),
+                        resultSet.getString("Lugar"),
+                        0
+                ));
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al ver los proyectos del departamento: " + e.getMessage());
+        }
+        System.out.println(proxectos);
+        return proxectos;
+    }
+
+    public static void listProxetosOfDepartamentos(Connection conector, String Nome_departamento) throws SQLException {
+        List<Proxecto> proxectos = proxectosOfDepartamento(conector, Nome_departamento);
+
+        if (proxectos.isEmpty()) {
+            System.out.println("No projects found for the department: " + Nome_departamento);
+            return;
+        }
+
+        StringBuilder sb = new StringBuilder();
+        for (Proxecto proxecto : proxectos) {
+            sb.append("- Num_proxecto: ").append(proxecto.getNum_proxecto()).append(" ")
+                    .append(", Nome_proxecto: ").append(proxecto.getNome_proxecto()).append(" ")
+                    .append(", Lugar: ").append(proxecto.getLugar()).append(" ")
+                    .append("\n");
+        }
+        System.out.println(sb.toString());
+    }
+
+
 }
