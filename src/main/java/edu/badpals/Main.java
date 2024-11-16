@@ -19,7 +19,7 @@ public class Main {
         //Ejercicio2.updateSalarioDepartamento(conector, 1, 10000);
 
         //Funciona con datos hardcodeados
-        //Departamento departamento = new Departamento(7, "Informatica", "7000007", "2021-01-01");
+        //Departamento departamento = new Departamento(7, "ADMINISTRACIÓN", "7000007", "2021-01-01");
         //Ejercicio2.createDepartamento(conector, departamento);
 
         //Funciona con datos hardcodeados
@@ -41,7 +41,7 @@ public class Main {
         //Ejercicio2.deleteProxecto(conector, 11);
         //Ejercicio 2.4
         //Funciona con datos hardcodeados
-        Ejercicio2.listProxetosOfDepartamentos(conector, "Vigo");
+        //Ejercicio2.listProxetosOfDepartamentos(conector, "INFORMÁTICA");
 
     }
 }

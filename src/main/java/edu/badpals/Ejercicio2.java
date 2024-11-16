@@ -106,7 +106,7 @@ public class Ejercicio2 {
 
     public static void changeDepartamentoInProxecto(Connection conector, String Nome_Proxecto, String Nome_departamento) {
         try {
-            String query = "UPDATE PROXECTO SET Num_departamento_controla = (SELECT Num_departamento FROM DEPARTAMENTO WHERE Nome_departamento = ?) WHERE  Nome_proxecto = ?";
+            String query = "UPDATE PROXECTO SET NUM_DEPARTAMENTO = (SELECT NUM_DEPARTAMENTO FROM DEPARTAMENTO WHERE NOME_DEPARTAMENTO = ?) WHERE  NOME_PROXECTO = ?";
             PreparedStatement preparedStatement = conector.prepareStatement(query);
             preparedStatement.setString(1, Nome_departamento);
             preparedStatement.setString(2, Nome_Proxecto);
@@ -121,7 +121,7 @@ public class Ejercicio2 {
     //-B
     public static void newProxecto(Connection conector, Proxecto newProxecto){
         try {
-            String query = "INSERT INTO PROXECTO (Num_proxecto, Nome_proxecto, Lugar, Num_departamento_controla) VALUES (?, ?, ?, ?)";
+            String query = "INSERT INTO PROXECTO (Num_proxecto, Nome_proxecto, Lugar, NUM_DEPARTAMENTO) VALUES (?, ?, ?, ?)";
             PreparedStatement preparedStatement = conector.prepareStatement(query);
             preparedStatement.setInt(1, newProxecto.getNum_proxecto());
             preparedStatement.setString(2, newProxecto.getNome_proxecto());
@@ -151,7 +151,7 @@ public class Ejercicio2 {
     //Ejercicio 2.4
     public static List<Proxecto> proxectosOfDepartamento(Connection conector, String Nome_departamento) {
         List<Proxecto> proxectos = new ArrayList<>();
-        String query = "SELECT P.Num_proxecto, P.Nome_proxecto, P.Lugar FROM PROXECTO P JOIN DEPARTAMENTO D ON P.Num_departamento_controla = D.Num_departamento WHERE D.Nome_departamento = ?";
+        String query = "SELECT P.Num_proxecto, P.Nome_proxecto, P.Lugar FROM PROXECTO P JOIN DEPARTAMENTO D ON P.NUM_DEPARTAMENTO = D.Num_departamento WHERE D.Nome_departamento = ?";
         try {
             PreparedStatement preparedStatement = conector.prepareStatement(query);
             preparedStatement.setString(1, Nome_departamento);
