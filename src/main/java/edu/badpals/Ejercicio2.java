@@ -411,7 +411,7 @@ public class Ejercicio2 {
     public static void obtenerEmpleadosPorNumeroProyectos(Connection conector, int numeroProyectos) {
         String query = "SELECT E.NSS, \n" +
                 "       CONCAT(E.Nome, ' ', E.APELIDO_1, ' ', E.APELIDO_2) AS NomeCompleto, \n" +
-                "       COALESCE(E.Localidade, '') AS Localidade, \n" +
+                "       E.Localidade, '' AS Localidade, \n" +
                 "       E.Salario \n" +
                 "FROM EMPREGADO E \n" +
                 "JOIN EMPREGADO_PROXECTO EP ON E.NSS = EP.NSS_EMPREGADO \n" +
@@ -422,43 +422,32 @@ public class Ejercicio2 {
                 ResultSet.TYPE_SCROLL_INSENSITIVE,
                 ResultSet.CONCUR_READ_ONLY)) {
 
-            // Establecer el valor del parámetro
             stmt.setInt(1, numeroProyectos);
-
-            // Ejecutar la consulta
             ResultSet resultSet = stmt.executeQuery();
 
-            // Asegúrate de que el ResultSet no esté vacío
             if (!resultSet.next()) {
                 System.out.println("No se encontraron empleados.");
                 return;
             }
 
-            // Visualiza la primera fila
             System.out.println("Primera fila:");
             mostrarFila(resultSet);
 
-            // Volver a la primera fila y visualizar la última fila
             if (resultSet.last()) {
                 System.out.println("Última fila:");
                 mostrarFila(resultSet);
             }
 
-            // Visualiza la antepenúltima fila si hay suficientes filas
             if (resultSet.getRow() > 2) {
-                resultSet.absolute(resultSet.getRow() - 2);  // Nos movemos a la antepenúltima fila
+                resultSet.absolute(resultSet.getRow() - 2);
                 System.out.println("Antepenúltima fila:");
                 mostrarFila(resultSet);
             }
 
-            // Muestra toda la información en sentido contrario (de la última fila a la primera)
             System.out.println("Toda la información en sentido contrario (de la última fila a la primera):");
 
-            // Volver a la última fila si estábamos en una fila intermedia
             resultSet.last();
 
-            // Antes de recorrer en reversa, asegurarnos de que la primera fila del ResultSet
-            // sea la primera fila que se mostrará en la iteración inversa.
             do {
                 mostrarFila(resultSet);
             } while (resultSet.previous());

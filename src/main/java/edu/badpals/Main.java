@@ -58,13 +58,22 @@ public class Main {
 //        Ejercicio2.obtenerNumEmpleadosDepartamento(conector, "INFORMÁTICA");
 //        Ejercicio 2.6
 //        -A
+//        Funciona con datos hardcodeados
 //        Ejercicio2.visualizarTiposResultSet(conector);
 //        -B
+//        Funciona con datos hardcodeados
 //        Ejercicio2.insertarProxecto(conector, new Proxecto(14, "Proyecto ResultSet2", "Vigo", 7));
 //        -C
+//        Funciona con datos hardcodeados
 //        Ejercicio2.incrementarSalarioDepartamento(conector, 1, 1000);
 //        -D
-Ejercicio2.obtenerEmpleadosPorNumeroProyectos(conector, 1);
+//        Funciona con datos hardcodeados
+//        Ejercicio2.obtenerEmpleadosPorNumeroProyectos(conector, 1);
+
+
+
+
+//        Ejercicio 3
 
     }
 }
