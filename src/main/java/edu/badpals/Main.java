@@ -11,7 +11,7 @@ import java.sql.SQLException;
 public class Main {
     public static void main(String[] args) throws SQLException {
         ConnectionDDBB conectar = new ConnectionDDBB();
-        Connection conector = conectar.createConection();
+        Connection conector = conectar.createConnection();
 
 //        Ejercicio 2.1
 //
@@ -55,9 +55,16 @@ public class Main {
 //        Ejercicio2.departControlaProxec(conector, 1);
 //        -D
 //        Funciona con datos hardcodeados
-//          Ejercicio2.obtenerNumEmpleadosDepartamento(conector, "INFORMÁTICA");
+//        Ejercicio2.obtenerNumEmpleadosDepartamento(conector, "INFORMÁTICA");
 //        Ejercicio 2.6
-//        Funciona con datos hardcodeados
+//        -A
+//        Ejercicio2.visualizarTiposResultSet(conector);
+//        -B
+//        Ejercicio2.insertarProxecto(conector, new Proxecto(14, "Proyecto ResultSet2", "Vigo", 7));
+//        -C
+//        Ejercicio2.incrementarSalarioDepartamento(conector, 1, 1000);
+//        -D
+Ejercicio2.obtenerEmpleadosPorNumeroProyectos(conector, 1);
 
     }
 }

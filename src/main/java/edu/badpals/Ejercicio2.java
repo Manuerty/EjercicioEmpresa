@@ -294,6 +294,199 @@ public class Ejercicio2 {
     }
 
     //Ejercicio 2.6
+    // -A
+    public static void visualizarTiposResultSet(Connection conector) {
+        try {
+            DatabaseMetaData metaData = conector.getMetaData();
+            System.out.println("Tipos de ResultSet soportados:");
+            System.out.println("ResultSet.TYPE_FORWARD_ONLY: " + metaData.supportsResultSetType(ResultSet.TYPE_FORWARD_ONLY));
+            System.out.println("ResultSet.TYPE_SCROLL_INSENSITIVE: " + metaData.supportsResultSetType(ResultSet.TYPE_SCROLL_INSENSITIVE));
+            System.out.println("ResultSet.TYPE_SCROLL_SENSITIVE: " + metaData.supportsResultSetType(ResultSet.TYPE_SCROLL_SENSITIVE));
+
+            System.out.println("\nTipos de concurrencia soportados:");
+            System.out.println("ResultSet.CONCUR_READ_ONLY: " + metaData.supportsResultSetConcurrency(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY));
+            System.out.println("ResultSet.CONCUR_UPDATABLE: " + metaData.supportsResultSetConcurrency(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE));
+
+        } catch (SQLException e) {
+            System.err.println("Error al obtener información sobre los ResultSet: " + e.getMessage());
+        }
+    }
+    // -B
+    private static boolean existeProxecto(Connection conector, int numProxecto, String nomeProxecto) throws SQLException {
+        String query = "SELECT * FROM PROXECTO";
+
+        try (Statement statement = conector.createStatement();
+             ResultSet resultSet = statement.executeQuery(query)) {
+
+            while (resultSet.next()) {
+                int numProx = resultSet.getInt("Num_proxecto");
+                String nome = resultSet.getString("Nome_proxecto");
+
+                if (numProx == numProxecto && nome.equalsIgnoreCase(nomeProxecto)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private static boolean existeDepartamento(Connection conector, int numDepartamento) throws SQLException {
+        String query = "SELECT * FROM DEPARTAMENTO WHERE Num_departamento = ?";
+
+        try (PreparedStatement preparedStatement = conector.prepareStatement(query)) {
+            preparedStatement.setInt(1, numDepartamento);
+
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                return resultSet.next();
+            }
+        }
+    }
+
+    public static void insertarProxecto(Connection conector, Proxecto nuevoProxecto) throws SQLException {
+        String query = "SELECT * FROM PROXECTO";
+
+        try (Statement statement = conector.createStatement();
+             ResultSet resultSet = statement.executeQuery(query)) {
+
+            while (resultSet.next()) {
+                int numProx = resultSet.getInt("Num_proxecto");
+                String nome = resultSet.getString("Nome_proxecto");
+
+                if (numProx == nuevoProxecto.getNum_proxecto() && nome.equalsIgnoreCase(nuevoProxecto.getNome_proxecto())) {
+                    System.out.println("Error: Ya existe un proyecto con el mismo número y nombre.");
+                    return;
+                }
+            }
+
+            if (!existeDepartamento(conector, nuevoProxecto.getNum_departamento_controla())) {
+                System.out.println("Error: El departamento indicado no existe.");
+                return;
+            }
+
+            String insertQuery = "INSERT INTO PROXECTO (Num_proxecto, Nome_proxecto, Lugar, NUM_DEPARTAMENTO) VALUES (?, ?, ?, ?)";
+
+            try (PreparedStatement preparedStatement = conector.prepareStatement(insertQuery)) {
+                preparedStatement.setInt(1, nuevoProxecto.getNum_proxecto());
+                preparedStatement.setString(2, nuevoProxecto.getNome_proxecto());
+                preparedStatement.setString(3, nuevoProxecto.getLugar());
+                preparedStatement.setInt(4, nuevoProxecto.getNum_departamento_controla());
+
+                preparedStatement.executeUpdate();
+                System.out.println("Proyecto insertado con éxito.");
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Error al insertar el proyecto: " + e.getMessage());
+        }
+    }
+    // -C
+    public static void incrementarSalarioDepartamento(Connection conector, float incremento, int numDepartamento) {
+        String selectQuery = "SELECT NSS, Salario FROM EMPREGADO WHERE Num_departamento_pertenece = ?";
+
+        try (PreparedStatement stmt = conector.prepareStatement(selectQuery,
+                ResultSet.TYPE_SCROLL_INSENSITIVE,
+                ResultSet.CONCUR_UPDATABLE)) {
+
+            stmt.setInt(1, numDepartamento);
+
+            ResultSet resultSet = stmt.executeQuery();
+
+            while (resultSet.next()) {
+                float salarioActual = resultSet.getFloat("Salario");
+
+                float nuevoSalario = salarioActual + incremento;
+
+                resultSet.updateFloat("Salario", nuevoSalario);
+
+                resultSet.updateRow();
+            }
+
+            System.out.println("Salarios actualizados con éxito para el departamento: " + numDepartamento);
+
+        } catch (SQLException e) {
+            System.err.println("Error al actualizar los salarios: " + e.getMessage());
+        }
+    }
+    // -D
+    public static void obtenerEmpleadosPorNumeroProyectos(Connection conector, int numeroProyectos) {
+        String query = "SELECT E.NSS, \n" +
+                "       CONCAT(E.Nome, ' ', E.APELIDO_1, ' ', E.APELIDO_2) AS NomeCompleto, \n" +
+                "       COALESCE(E.Localidade, '') AS Localidade, \n" +
+                "       E.Salario \n" +
+                "FROM EMPREGADO E \n" +
+                "JOIN EMPREGADO_PROXECTO EP ON E.NSS = EP.NSS_EMPREGADO \n" +
+                "GROUP BY E.NSS, E.Nome, E.APELIDO_1, E.APELIDO_2, E.Localidade, E.Salario \n" +
+                "HAVING COUNT(EP.Num_proxecto) > ?;";
+
+        try (PreparedStatement stmt = conector.prepareStatement(query,
+                ResultSet.TYPE_SCROLL_INSENSITIVE,
+                ResultSet.CONCUR_READ_ONLY)) {
+
+            // Establecer el valor del parámetro
+            stmt.setInt(1, numeroProyectos);
+
+            // Ejecutar la consulta
+            ResultSet resultSet = stmt.executeQuery();
+
+            // Asegúrate de que el ResultSet no esté vacío
+            if (!resultSet.next()) {
+                System.out.println("No se encontraron empleados.");
+                return;
+            }
+
+            // Visualiza la primera fila
+            System.out.println("Primera fila:");
+            mostrarFila(resultSet);
+
+            // Volver a la primera fila y visualizar la última fila
+            if (resultSet.last()) {
+                System.out.println("Última fila:");
+                mostrarFila(resultSet);
+            }
+
+            // Visualiza la antepenúltima fila si hay suficientes filas
+            if (resultSet.getRow() > 2) {
+                resultSet.absolute(resultSet.getRow() - 2);  // Nos movemos a la antepenúltima fila
+                System.out.println("Antepenúltima fila:");
+                mostrarFila(resultSet);
+            }
+
+            // Muestra toda la información en sentido contrario (de la última fila a la primera)
+            System.out.println("Toda la información en sentido contrario (de la última fila a la primera):");
+
+            // Volver a la última fila si estábamos en una fila intermedia
+            resultSet.last();
+
+            // Antes de recorrer en reversa, asegurarnos de que la primera fila del ResultSet
+            // sea la primera fila que se mostrará en la iteración inversa.
+            do {
+                mostrarFila(resultSet);
+            } while (resultSet.previous());
+
+        } catch (SQLException e) {
+            System.err.println("Error al obtener los empleados: " + e.getMessage());
+        }
+    }
+
+    private static void mostrarFila(ResultSet resultSet) throws SQLException {
+        String nss = resultSet.getString("NSS");
+        String nomeCompleto = resultSet.getString("NomeCompleto");
+        String localidade = resultSet.getString("Localidade");
+        float salario = resultSet.getFloat("Salario");
+
+        // Reemplazar saltos de línea y retorno de carro en "Localidade"
+        if (localidade != null) {
+            localidade = localidade.replaceAll("[\n\r]", " "); // Reemplaza saltos de línea y retorno de carro por espacio
+        }
+
+        // Ajustamos la longitud de las columnas para evitar truncamientos en los textos largos
+        System.out.printf("NSS: %-15s | Nome: %-30s | Localidade: %-30s | Salario: %.2f\n", nss, nomeCompleto, localidade, salario);
+    }
+
+
+
+
+
 
 
 
