@@ -8,17 +8,10 @@ import java.util.Properties;
 public class ConnectionDDBB {
     String urlDB ="jdbc:mysql://localhost:3306/empresa_db";
 
-
     public Connection createConection() throws SQLException {
         Properties conectionProperties = new Properties();
         conectionProperties.setProperty("user", "root");
         conectionProperties.setProperty("password", "root");
         return DriverManager.getConnection(urlDB, conectionProperties);
     }
-
-    public void closeConnection(Connection conector) throws SQLException {
-        conector.close();
-    }
-
-
 }

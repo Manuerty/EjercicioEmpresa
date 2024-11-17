@@ -4,10 +4,7 @@ import edu.badpals.Model.Departamento;
 import edu.badpals.Model.Empleado;
 import edu.badpals.Model.Proxecto;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -81,11 +78,11 @@ public class Ejercicio2 {
         return empleados;
     }
 
-    public static void listarEmpleadosLocalidades(Connection conector, String localidad) throws SQLException{
+    public static void listarEmpleadosLocalidades(Connection conector, String localidad) throws SQLException {
         List<Empleado> empleados = viewEmpleadosLocalidades(conector, localidad);
         StringBuilder sb = new StringBuilder();
 
-        for (Empleado empleado : empleados){
+        for (Empleado empleado : empleados) {
             StringBuilder append = sb.append("- Nombre: ").append(empleado.getNomeEmpregado()).append(" ")
                     .append(", 1er Apellido: ").append(empleado.getApelido1()).append(" ")
                     .append(", 2o Apellido: ").append(empleado.getApelido2()).append(" ")
@@ -119,7 +116,7 @@ public class Ejercicio2 {
 
 
     //-B
-    public static void newProxecto(Connection conector, Proxecto newProxecto){
+    public static void newProxecto(Connection conector, Proxecto newProxecto) {
         try {
             String query = "INSERT INTO PROXECTO (Num_proxecto, Nome_proxecto, Lugar, NUM_DEPARTAMENTO) VALUES (?, ?, ?, ?)";
             PreparedStatement preparedStatement = conector.prepareStatement(query);
@@ -135,13 +132,13 @@ public class Ejercicio2 {
     }
 
     //-C
-    public static void deleteProxecto(Connection conector, int Num_Proxecto){
-        try{
+    public static void deleteProxecto(Connection conector, int Num_Proxecto) {
+        try {
             String query = "DELETE FROM PROXECTO WHERE Num_proxecto = ?";
             PreparedStatement preparedStatement = conector.prepareStatement(query);
             preparedStatement.setInt(1, Num_Proxecto);
             preparedStatement.executeUpdate();
-        }catch(SQLException e){
+        } catch (SQLException e) {
             System.out.println("Error al eliminar un proxecto" + e.getMessage());
         }
 
@@ -188,6 +185,118 @@ public class Ejercicio2 {
         }
         System.out.println(sb.toString());
     }
+
+    //Ejercicio 2.5
+    // -A
+
+    public static void cambioDomicilio(Connection conector, String nss, String rua, Integer numeroRua, String piso, String cp, String localidade) {
+        String query = "{CALL pr_cambioDomicilio(?, ?, ?, ?, ?, ?)}";
+        try (CallableStatement callableStatement = conector.prepareCall(query)) {
+            callableStatement.setString(1, nss);
+            callableStatement.setString(2, rua);
+
+            if (numeroRua != null) {
+                callableStatement.setInt(3, numeroRua);
+            } else {
+                callableStatement.setNull(3, java.sql.Types.INTEGER);
+            }
+
+            callableStatement.setString(4, piso);
+            callableStatement.setString(5, cp);
+            callableStatement.setString(6, localidade);
+
+            callableStatement.execute();
+            System.out.println("Cambio de domicilio realizado con éxito para el empleado con NSS: " + nss);
+        } catch (SQLException e) {
+            System.err.println("Error al cambiar el domicilio: " + e.getMessage());
+        }
+    }
+
+    // -B
+    public static Proxecto datosProxecto(Connection conector, int numProxecto) {
+        String query = "{CALL pr_DatosProxectos(?, ?, ?, ?)}";
+        Proxecto proxecto = null;
+
+        try (CallableStatement callableStatement = conector.prepareCall(query)) {
+
+            callableStatement.setInt(1, numProxecto);
+
+
+            callableStatement.registerOutParameter(2, java.sql.Types.VARCHAR); // Nome_proxecto
+            callableStatement.registerOutParameter(3, java.sql.Types.VARCHAR); // Lugar
+            callableStatement.registerOutParameter(4, java.sql.Types.INTEGER); // Num_departamento
+
+
+            callableStatement.execute();
+
+
+            String nomeProxecto = callableStatement.getString(2);
+            String lugar = callableStatement.getString(3);
+            int numDepartamento = callableStatement.getInt(4);
+
+
+            proxecto = new Proxecto(numProxecto, nomeProxecto, lugar, numDepartamento);
+
+        } catch (SQLException e) {
+            System.err.println("Error al obtener los datos del proyecto: " + e.getMessage());
+        }
+
+        return proxecto; // Retorna el objeto Proxecto o null si ocurrió un error
+    }
+
+    // -C
+    public static void departControlaProxec(Connection conector, int numProxectos) {
+        String query = "{CALL pr_DepartControlaProxec(?)}";
+        try (CallableStatement callableStatement = conector.prepareCall(query)) {
+            callableStatement.setInt(1, numProxectos);
+
+            boolean hasResultSet = callableStatement.execute(); // Ejecuta el procedimiento
+
+            if (hasResultSet) {
+                try (ResultSet resultSet = callableStatement.getResultSet()) {
+                    while (resultSet.next()) {
+                        String nomeDepartamento = resultSet.getString("Nome_departamento");
+                        int numProxectosControlados = resultSet.getInt("Num_proxectos");
+                        System.out.println("Departamento: " + nomeDepartamento + ", Número de Proyectos: " + numProxectosControlados);
+                    }
+                }
+            } else {
+                int affectedRows = callableStatement.getUpdateCount();
+                System.out.println("Sentencia de actualización ejecutada. Filas afectadas: " + affectedRows);
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Error al ejecutar el procedimiento: " + e.getMessage());
+        }
+    }
+
+    // -D
+    public static void obtenerNumEmpleadosDepartamento(Connection conector, String nomeDepartamento) {
+        String query = "{? = CALL fn_nEmpDepart(?)}"; // Llamada a la función con un parámetro de entrada y un valor de salida
+        try (CallableStatement callableStatement = conector.prepareCall(query)) {
+            // Registrar el parámetro de salida para la función
+            callableStatement.registerOutParameter(1, java.sql.Types.INTEGER);
+
+            // Asignar el valor del parámetro de entrada
+            callableStatement.setString(2, nomeDepartamento);
+
+            // Ejecutar la función
+            callableStatement.execute();
+
+            // Obtener el número de empleados retornado por la función
+            int numEmpleados = callableStatement.getInt(1);
+
+            // Visualizar el resultado
+            System.out.println("El número de empleados en el departamento '" + nomeDepartamento + "' es: " + numEmpleados);
+        } catch (SQLException e) {
+            System.err.println("Error al ejecutar la función fn_nEmpDepart: " + e.getMessage());
+        }
+    }
+
+    //Ejercicio 2.6
+
+
+
 
 
 }
