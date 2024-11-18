@@ -1,10 +1,7 @@
 package edu.badpals;
 
 
-import edu.badpals.Model.Departamento;
 import edu.badpals.Model.ConnectionDDBB;
-import edu.badpals.Model.Ejercicio3;
-import edu.badpals.Model.Proxecto;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -109,7 +106,7 @@ public class Main {
 //        Ejercicio3.showTransactionDetails();
 
 //        Ejercicio 3.6
-        Ejercicio3.showAdvancedSQLFeatures();
+//        Ejercicio3.showAdvancedSQLFeatures();
 
 //        Ejercicio 3.7
 //        String query = "SELECT * FROM proxecto";
